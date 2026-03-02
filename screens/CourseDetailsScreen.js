@@ -1,77 +1,181 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions } from "react-native";
-import { Video } from "expo-av"; // Make sure to install expo-av
+import { Video } from "expo-av";
+import { useEffect, useRef, useState } from "react";
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const { width } = Dimensions.get("window");
 
 const CONTENT_WIDTH = width > 900 ? 900 : width;
 const SIDE_MARGIN = width > 900 ? (width - 900) / 2 : 24;
+const IMAGE_WIDTH = CONTENT_WIDTH - SIDE_MARGIN * 2;
 
 export default function CourseDetailsScreen({ route }) {
   const { course } = route.params;
-  const [rating, setRating] = useState(course.rating);
 
-  const handleRating = (value) => {
-    const newRating = rating + value;
-    setRating(newRating > 6 ? 6 : newRating); // Max 6
+  const [rating, setRating] = useState(course.rating || 0);
+  const [videoRatio, setVideoRatio] = useState(16 / 9);
+  const scrollRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const images = [
+    course.image,
+    course.image1,
+    course.image2,
+  ].filter(Boolean);
+
+  // 🔥 AUTO SLIDE
+  useEffect(() => {
+    if (images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      const nextIndex =
+        currentIndex === images.length - 1 ? 0 : currentIndex + 1;
+
+      scrollRef.current?.scrollTo({
+        x: nextIndex * IMAGE_WIDTH,
+        animated: true,
+      });
+
+      setCurrentIndex(nextIndex);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentIndex, images.length]);
+
+  // Detect manual swipe
+  const handleScroll = (event) => {
+    const slide = Math.round(
+      event.nativeEvent.contentOffset.x / IMAGE_WIDTH
+    );
+    setCurrentIndex(slide);
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      
+      {/* TITLE */}
       <Text style={styles.title}>{course.name}</Text>
       <Text style={styles.level}>{course.level}</Text>
-      <Image
-       source={
-    typeof course.image === "number"
-      ? course.image
-      : course.image?.uri
-      ? course.image
-      : { uri: course.image }
-  }
-  style={styles.image}
-/>
 
-      <Text style={styles.entryHeader}>Entry Requirements:</Text>
-      <Text style={styles.entry}>{course.entryRequirements}</Text>
+      {/* DESCRIPTION */}
+      {course.description && (
+        <View style={styles.card}>
+          <Text style={styles.sectionHeader}>Course Description</Text>
+          <Text style={styles.entry}>{course.description}</Text>
+        </View>
+      )}
 
-      <Text style={styles.ratingHeader}>Rate this course:</Text>
-      <View style={styles.stars}>
-        {[1, 2, 3, 4, 5, 6].map((star) => (
-          <TouchableOpacity key={star} onPress={() => handleRating(1)}>
-            <Text style={{ fontSize: 30 }}>{star <= rating ? "⭐" : "☆"}</Text>
-          </TouchableOpacity>
-        ))}
+      {/* IMAGE SLIDER */}
+      {images.length > 0 && (
+        <View style={styles.sliderContainer}>
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={handleScroll}
+          >
+            {images.map((img, index) => (
+              <Image
+                key={index}
+                source={
+                  typeof img === "number"
+                    ? img
+                    : img?.uri
+                    ? img
+                    : { uri: img }
+                }
+                style={styles.image}
+                resizeMode="cover"
+              />
+            ))}
+          </ScrollView>
+
+          {/* DOT INDICATORS */}
+          {images.length > 1 && (
+            <View style={styles.dotsContainer}>
+              {images.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.dot,
+                    currentIndex === index && styles.activeDot,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* ENTRY REQUIREMENTS */}
+      <View style={styles.card}>
+        <Text style={styles.sectionHeader}>Entry Requirements</Text>
+        <Text style={styles.entry}>{course.entryRequirements}</Text>
       </View>
-      <Text style={styles.ratingText}>Rating: {rating} / 6</Text>
 
-      <Text style={styles.videoHeader}>Course Video:</Text>
-      <Video
-  source={
-    typeof course.video === "number"
-      ? course.video               // local video (require)
-      : { uri: course.video }      // online video
-  }
-  style={styles.video}
-  useNativeControls
-  resizeMode="contain"
-/>
+      {/* ⭐ RATING */}
+      <View style={styles.card}>
+        <Text style={styles.sectionHeader}>Rate this course</Text>
 
+        <View style={styles.stars}>
+          {[1, 2, 3, 4, 5, 6].map((star) => (
+            <TouchableOpacity key={star} onPress={() => setRating(star)}>
+              <Text style={styles.star}>
+                {star <= rating ? "⭐" : "☆"}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.ratingText}>
+          Rating: {rating} / 6
+        </Text>
+      </View>
+
+      {/* VIDEO */}
+      <View style={styles.card}>
+        <Text style={styles.sectionHeader}>Course Video</Text>
+
+        <Video
+          source={
+            typeof course.video === "number"
+              ? course.video
+              : { uri: course.video }
+          }
+          style={[styles.video, { aspectRatio: videoRatio }]}
+          useNativeControls
+          resizeMode="contain"
+          onLoad={(data) => {
+            if (data?.naturalSize?.width && data?.naturalSize?.height) {
+              setVideoRatio(
+                data.naturalSize.width /
+                  data.naturalSize.height
+              );
+            }
+          }}
+        />
+      </View>
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f1f5f9",
   },
 
-  // =========================
-  // Title Section
-  // =========================
   title: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#0f172a",
     marginTop: 30,
     marginBottom: 6,
     paddingHorizontal: SIDE_MARGIN,
@@ -80,65 +184,62 @@ const styles = StyleSheet.create({
   level: {
     fontSize: 16,
     color: "#64748b",
-    marginBottom: 24,
+    marginBottom: 20,
     paddingHorizontal: SIDE_MARGIN,
   },
 
-  // =========================
-  // Image
-  // =========================
-  image: {
-    width: CONTENT_WIDTH - SIDE_MARGIN * 2,
+  sliderContainer: {
+    width: IMAGE_WIDTH,
     height: 240,
     alignSelf: "center",
     borderRadius: 24,
-    marginBottom: 30,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 12,
-    elevation: 8,
+    overflow: "hidden",
+    marginBottom: 10,
   },
 
-  // =========================
-  // Entry Requirements Card
-  // =========================
-  entryHeader: {
+  image: {
+    width: IMAGE_WIDTH,
+    height: 240,
+  },
+
+  dotsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#cbd5e1",
+    marginHorizontal: 4,
+  },
+
+  activeDot: {
+    backgroundColor: "#2563eb",
+    width: 10,
+    height: 10,
+  },
+
+  card: {
+    backgroundColor: "#ffffff",
+    marginHorizontal: SIDE_MARGIN,
+    padding: 20,
+    borderRadius: 24,
+    marginBottom: 30,
+    elevation: 4,
+  },
+
+  sectionHeader: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#1e293b",
-    marginBottom: 10,
+    marginBottom: 14,
   },
 
   entry: {
     fontSize: 15,
-    color: "#475569",
     lineHeight: 22,
-  },
-
-  entryCard: {
-    backgroundColor: "#ffffff",
-    marginHorizontal: SIDE_MARGIN,
-    padding: 22,
-    borderRadius: 24,
-    marginBottom: 30,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 10,
-    elevation: 4,
-  },
-
-  // =========================
-  // Rating Section
-  // =========================
-  ratingHeader: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1e293b",
-    marginBottom: 14,
   },
 
   stars: {
@@ -147,55 +248,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+  star: {
+    fontSize: 30,
+    marginHorizontal: 4,
+  },
+
   ratingText: {
     fontSize: 16,
     textAlign: "center",
-    color: "#334155",
-    marginBottom: 20,
   },
 
-  ratingCard: {
-    backgroundColor: "#ffffff",
-    marginHorizontal: SIDE_MARGIN,
-    padding: 24,
-    borderRadius: 24,
-    marginBottom: 30,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 10,
-    elevation: 4,
+  video: {
+    width: "100%",
+    borderRadius: 20,
+    backgroundColor: "#000",
   },
-
-  // =========================
-  // Video Section
-  // =========================
-videoHeader: {
-  fontSize: 20,
-  fontWeight: "700",
-  color: "#1e293b",
-  marginBottom: 14,
-},
-
-video: {
-  width: "100%",
-  height: 240,
-  borderRadius: 20,
-  overflow: "hidden",
-},
-
-videoCard: {
-  backgroundColor: "#ffffff",
-  marginHorizontal: SIDE_MARGIN,
-  padding: 20,
-  borderRadius: 24,
-  marginBottom: 50,
-
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowOffset: { width: 0, height: 8 },
-  shadowRadius: 12,
-  elevation: 6,
-},
 });

@@ -1,19 +1,16 @@
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  Image,
-  ScrollView,
+  Animated,
   Dimensions,
+  Image,
   Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
   TextInput,
+  View
 } from "react-native";
-import React, { useState, useMemo } from "react";
 import { faculties } from "../data/faculties";
-import Footer from "../components/Footer";
-
-
 
 const { width } = Dimensions.get("window");
 
@@ -22,40 +19,55 @@ const SIDE_MARGIN = width > 900 ? (width - 900) / 2 : 24;
 
 export default function HomeScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFacultyDropdown, setShowFacultyDropdown] = useState(false);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const mottos = [
-    {
-      title: "Be the Best in digital & creative skills",
-      description:
-        "From augmented reality and touchscreen consoles to 3D printers, we provide the latest technology and expert guidance to ensure that your creativity is your limit.",
-      },
-    {
-      title: "Be the Best in making global connections",
-      description:
-        "Build your network, gain cultural insights, and explore global business opportunities with students from over 150 countries.",
-    },
-    {
-      title: "Be the Best in your sphere of studies",
-      description:
-        "Our programmes in design, business, and architecture are crafted to inspire critical thinking and innovation.",
-    },
-    {
-      title: "Be the Best trained to succeed",
-      description:
-        "Adapt and thrive in a competitive world through practical industry-driven training.",
-    },
-    {
-      title: "Be the Best to nurture & build your future",
-      description:
-        "Our experts help you nurture your talents and fast-track your future career.",
-    },
-    {
-      title: "Be the Best among the best",
-      description:
-        "Join Lesotho’s most award-winning university and prepare for an international career.",
-    },
-  ];
+  {
+    title: "Be the Best in digital & creative skills",
+    description:
+      "From augmented reality and touchscreen consoles to 3D printers, we provide the latest technology and expert guidance to ensure that your creativity is your limit.",
+    image: require("../assets/images/motto1.jpg"),
+  },
+  {
+    title: "Be the Best in making global connections",
+    description:
+      "Build your network, gain cultural insights, and explore global business opportunities with students from over 150 countries.",
+    image: require("../assets/images/motto2.jpg"),
+  },
+  {
+    title: "Be the Best in your sphere of studies",
+    description:
+      "Our programmes in design, business, and architecture are crafted to inspire critical thinking and innovation.",
+    image: require("../assets/images/motto3.jpg"),
+  },
+  {
+    title: "Be the Best trained to succeed",
+    description:
+      "Adapt and thrive in a highly competitive, globalised society. Our incubation units will train you to come up with innovative and practical solutions to current industry challenges.",
+    image: require("../assets/images/motto4.jpg"),
+  },
+];
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    let nextIndex = currentIndex + 1;
+
+    if (nextIndex >= mottos.length) {
+      nextIndex = 0;
+    }
+
+    Animated.timing(slideAnim, {
+      toValue: -nextIndex * CONTENT_WIDTH,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+
+    setCurrentIndex(nextIndex);
+  }, 3000);
+
+  return () => clearInterval(interval);
+}, []);
 
   const allCourses = useMemo(() => {
   return faculties.flatMap(faculty =>
@@ -102,38 +114,6 @@ const filteredCourses = useMemo(() => {
     <Text style={styles.heroSubtitle}>
       Explore our faculties and discover your future career path.
     </Text>
-
-    {/* Faculties Button */}
-    <Pressable
-      style={({ pressed }) => [
-        styles.heroButton,
-        { opacity: pressed ? 0.8 : 1 }
-      ]}
-      onPress={() => setShowFacultyDropdown(!showFacultyDropdown)}
-    >
-      <Text style={styles.heroButtonText}>View Faculties</Text>
-    </Pressable>
-
-    {/* Dropdown List */}
-    {showFacultyDropdown && (
-      <View style={styles.facultyDropdown}>
-        {faculties.map((item) => (
-          <Pressable
-            key={item.id}
-            style={({ pressed }) => [
-              styles.dropdownItem,
-              { backgroundColor: pressed ? "#334155" : "#1e293b" },
-            ]}
-            onPress={() => {
-              setShowFacultyDropdown(false);
-              navigation.navigate("Courses", { faculty: item });
-            }}
-          >
-            <Text style={styles.dropdownText}>{item.name}</Text>
-          </Pressable>
-        ))}
-      </View>
-    )}
   </View>
 </View>
 
@@ -173,51 +153,49 @@ const filteredCourses = useMemo(() => {
   </View>
 )}
 
-
-      {/* Mottos */}
-      <Text style={styles.sectionHeader}>Our Mottos</Text>
-      <View style={styles.mottosContainer}>
-        {mottos.map((item, index) => (
-          <Pressable
-            key={index}
-            style={({ pressed }) => [
-              styles.mottoCard,
-              {
-                transform: [{ scale: pressed ? 0.98 : 1 }],
-              },
-            ]}
-          >
-            <Text style={styles.mottoTitle}>{item.title}</Text>
-            <Text style={styles.mottoDescription}>
-              {item.description}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      
-      {/* ENROL STICKER */}
-<View style={styles.enrolOuter}>
-  <View style={styles.enrolSticker}>
-    <Text style={styles.enrolMain}>ENROL NOW</Text>
-
-    <View style={styles.enrolRow}>
-      <Text style={styles.enrolIcon}>📞</Text>
-      <Text style={styles.enrolText}>
-        Toll free: 80022066 / 80022088
+<View style={styles.facultyGridContainer}>
+  {faculties.map((faculty) => (
+    <Pressable
+      key={faculty.id}
+      style={({ pressed }) => [
+        styles.facultyGridCard,
+        { transform: [{ scale: pressed ? 0.97 : 1 }] }
+      ]}
+      onPress={() =>
+        navigation.navigate("Courses", { faculty })
+      }
+    >
+      <Text style={styles.facultyGridText}>
+        {faculty.name}
       </Text>
-    </View>
-
-    <View style={styles.enrolRow}>
-      <Text style={styles.enrolIcon}>🌐</Text>
-      <Text style={styles.enrolText}>
-        www.limkokwing.net
-      </Text>
-    </View>
-  </View>
+    </Pressable>
+  ))}
 </View>
-      <Footer />
-      
+
+{/* Mottos Slider */}
+<View style={styles.sliderWrapper}>
+  <Animated.View
+    style={[
+      styles.sliderContainer,
+      { transform: [{ translateX: slideAnim }] },
+    ]}
+  >
+    {mottos.map((item, index) => (
+      <View key={index} style={styles.mottoSlide}>
+        <Image source={item.image} style={styles.mottoImage} />
+        
+
+        <View style={styles.mottoContent}>
+          <Text style={styles.mottoTitle}>{item.title}</Text>
+          <Text style={styles.mottoDescription}>
+            {item.description}
+          </Text>
+        </View>
+      </View>
+    ))}
+  </Animated.View>
+</View>
+    
     </ScrollView>
   );
 }
@@ -234,7 +212,7 @@ const styles = StyleSheet.create({
 
 bannerWrapper: {
   height: CONTENT_WIDTH * 0.55,
-  marginBottom: 30,
+  marginBottom: 90,
   position: "relative",
 },
 
@@ -252,7 +230,7 @@ overlay: {
 
 heroTextContainer: {
   position: "absolute",
-  bottom: 40,
+  bottom: 10,
   left: SIDE_MARGIN,
   right: SIDE_MARGIN,
 },
@@ -350,41 +328,52 @@ dropdownText: {
     textAlign: "center",
   },
 
-  // Mottos
-  mottosContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    paddingHorizontal: SIDE_MARGIN,
-    marginBottom: 50,
-  },
+ // SLIDER WRAPPER
+sliderWrapper: {
+  width: CONTENT_WIDTH,
+  height: 380,
+  overflow: "hidden",
+  alignSelf: "center",
+  marginBottom: 60,
+},
 
-  mottoCard: {
-    width: "48%",
-    backgroundColor: "#f1f5f9",
-    borderRadius: 18,
-    padding: 18,
-    marginBottom: 18,
+sliderContainer: {
+  flexDirection: "row",
+  width: CONTENT_WIDTH * 4, // number of mottos
+},
 
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
-    elevation: 3,
-  },
+mottoSlide: {
+  width: CONTENT_WIDTH,
+  alignItems: "center",
+},
 
-  mottoTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#0f172a",
-    marginBottom: 8,
-  },
+mottoImage: {
+  width: "100%",
+  height: 220,
+  borderRadius: 20,
+},
 
-  mottoDescription: {
-    fontSize: 12.5,
-    color: "#475569",
-    lineHeight: 18,
-  },
+
+mottoContent: {
+  marginTop: 20,
+  paddingHorizontal: 20,
+  alignItems: "center",
+},
+
+mottoTitle: {
+  fontSize: 18,
+  fontWeight: "800",
+  color: "#0f172a",
+  textAlign: "center",
+  marginBottom: 10,
+},
+
+mottoDescription: {
+  fontSize: 14,
+  color: "#475569",
+  textAlign: "center",
+  lineHeight: 22,
+},
 
   searchContainer: {
   paddingHorizontal: SIDE_MARGIN,
@@ -433,57 +422,83 @@ searchFaculty: {
   color: "#64748b",
 },
 
- // =============================
-// ENROL STICKER (IMAGE STYLE)
-// =============================
 
-enrolOuter: {
-  paddingHorizontal: SIDE_MARGIN,
-  marginBottom: 0.1,
-  alignItems: "center",
-},
+// =======================
+// HERO BUTTON ROW
+// =======================
 
-enrolSticker: {
-  backgroundColor: "#c1121f", 
-  width: "60%",
-  borderRadius: 35, 
-  paddingVertical: 1,
-  paddingHorizontal:1,
-  borderWidth: 4,
-  borderColor: "#ffffff",
-  transform: [{ rotate: "-2deg" }],
-
-  shadowColor: "#000000",
-  shadowOpacity: 0.9,
-  shadowOffset: { width: 0, height: 10 },
-  shadowRadius: 12,
-  elevation: 9,
-},
-
-enrolMain: {
-  fontSize: 20,
-  fontWeight: "900",
-  color: "#ffffff",
-  textAlign: "center",
-  marginBottom: 1,
-  letterSpacing: 1.5,
-},
-
-enrolRow: {
+heroButtonRow: {
   flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: 20,
+},
+
+heroPrimaryButton: {
+  flex: 1,
+  backgroundColor: "#38bdf8",
+  paddingVertical: 13,
+  borderRadius: 14,
+  marginRight: 10,
   alignItems: "center",
-  justifyContent: "center",
-  marginBottom: 1,
+  elevation: 4,
 },
 
-enrolIcon: {
-  fontSize: 16,
-  marginRight: 6,
-},
-
-enrolText: {
-  fontSize: 14,
-  fontWeight: "700",
+heroPrimaryText: {
   color: "#ffffff",
+  fontWeight: "700",
+  fontSize: 14,
+},
+
+heroSecondaryButton: {
+  flex: 1,
+  backgroundColor: "#0f172a",
+  paddingVertical: 13,
+  borderRadius: 14,
+  marginLeft: 10,
+  alignItems: "center",
+  elevation: 4,
+},
+
+heroSecondaryText: {
+  color: "#ffffff",
+  fontWeight: "700",
+  fontSize: 14,
+},
+
+// =======================
+// FACULTY GRID
+// =======================
+
+facultyGridContainer: {
+  paddingHorizontal: SIDE_MARGIN,
+  marginTop: 30,
+  marginBottom: 30,
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+},
+
+facultyGridCard: {
+  width: "48%",
+  backgroundColor: "#1e293b",
+  paddingVertical: 20,
+  paddingHorizontal: 12,
+  borderRadius: 18,
+  marginBottom: 15,
+  justifyContent: "center",
+  alignItems: "center",
+
+  shadowColor: "#000",
+  shadowOpacity: 0.15,
+  shadowOffset: { width: 0, height: 4 },
+  shadowRadius: 6,
+  elevation: 5,
+},
+
+facultyGridText: {
+  color: "#ffffff",
+  fontSize: 13,
+  fontWeight: "600",
+  textAlign: "center",
 },
 });
