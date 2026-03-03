@@ -20,7 +20,6 @@ export default function CourseDetailsScreen({ route }) {
   const { course } = route.params;
 
   const [rating, setRating] = useState(course.rating || 0);
-  const [videoRatio, setVideoRatio] = useState(16 / 9);
   const scrollRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -141,28 +140,21 @@ export default function CourseDetailsScreen({ route }) {
       </View>
 
       {/* VIDEO */}
-      <View style={styles.card}>
-        <Text style={styles.sectionHeader}>Course Video</Text>
+      {course.video && (
+  <View style={styles.card}>
+    <Text style={styles.sectionHeader}>Course Video</Text>
 
-        <Video
-          source={
-            typeof course.video === "number"
-              ? course.video
-              : { uri: course.video }
-          }
-          style={[styles.video, { aspectRatio: videoRatio }]}
-          useNativeControls
-          resizeMode="contain"
-          onLoad={(data) => {
-            if (data?.naturalSize?.width && data?.naturalSize?.height) {
-              setVideoRatio(
-                data.naturalSize.width /
-                  data.naturalSize.height
-              );
-            }
-          }}
-        />
-      </View>
+    <Video
+      source={course.video}
+      style={styles.video}
+      useNativeControls
+      resizeMode="cover"
+      shouldPlay={false}
+      isLooping={false}
+      isMuted={false}
+    />
+  </View>
+)}
     </ScrollView>
   );
 }
@@ -259,8 +251,9 @@ const styles = StyleSheet.create({
   },
 
   video: {
-    width: "100%",
-    borderRadius: 20,
-    backgroundColor: "#000",
-  },
+  width: "100%",
+  height: 220,
+  backgroundColor: "#000",
+  borderRadius: 20,
+},
 });

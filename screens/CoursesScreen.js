@@ -2,10 +2,11 @@ import {
   Dimensions,
   FlatList,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -24,31 +25,49 @@ export default function CoursesScreen({ route, navigation }) {
         data={faculty.programmes}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 40 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() =>
-              navigation.navigate("CourseDetails", { course: item })
-            }
-          >
-            <Image
-              source={
-                typeof item.image === "number"
-                  ? item.image
-                  : item.image?.uri
-                  ? item.image
-                  : { uri: item.image }
-              }
-              style={styles.image}
-              resizeMode="cover"
-            />
+       renderItem={({ item }) => (
+  <View style={styles.card}>
+    <Image
+      source={
+        typeof item.image === "number"
+          ? item.image
+          : item.image?.uri
+          ? item.image
+          : { uri: item.image }
+      }
+      style={styles.image}
+      resizeMode="cover"
+    />
 
-            <View style={styles.cardContent}>
-              <Text style={styles.title}>{item.name}</Text>
-              <Text style={styles.level}>{item.level}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
+    <View style={styles.cardContent}>
+<View style={styles.titleRow}>
+
+  <ScrollView
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={{ paddingRight: 10 }}
+    style={{ flex: 1, marginRight: 10 }}
+  >
+    <Text style={styles.title}>
+      {item.name}
+    </Text>
+  </ScrollView>
+
+  <TouchableOpacity
+    onPress={() =>
+      navigation.navigate("CourseDetails", { course: item })
+    }
+  >
+    <Text style={styles.detailsText}>More Details</Text>
+  </TouchableOpacity>
+
+</View>
+
+  <Text style={styles.level}>{item.level}</Text>
+
+</View>
+  </View>
+)}
       />
     </View>
   );
@@ -87,15 +106,25 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1e293b",
-    marginBottom: 6,
-  },
-
   level: {
     fontSize: 14,
     color: "#64748b",
   },
+titleRow: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+title: {
+  fontSize: 18,
+  fontWeight: "700",
+  color: "#1e293b",
+  marginRight: 15,   
+},
+
+detailsText: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#2563eb",
+},
 });
