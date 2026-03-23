@@ -64,6 +64,8 @@ useEffect(() => {
 
   return () => clearInterval(interval);
 }, []);
+
+  
   const allCourses = useMemo(() => {
   return faculties.flatMap(faculty =>
     faculty.programmes.map(course => ({
@@ -92,7 +94,7 @@ const filteredCourses = useMemo(() => {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
-  {/* HERO BANNER */}
+  //HERO BANNER 
 <View style={styles.bannerWrapper}>
   <Image
     source={require("../assets/images/luct.jpg")}
@@ -111,7 +113,8 @@ const filteredCourses = useMemo(() => {
     </Text>
   </View>
 </View>
-{/* University Overview */}
+      
+//University Overview 
 <View style={styles.overviewContainer}>
 
   <View style={styles.overviewColumns}>
@@ -183,7 +186,7 @@ const filteredCourses = useMemo(() => {
   ))}
 </View>
 
-{/* Take Quiz Button */}
+// Take Quiz Button
 <View style={styles.quizButtonContainer}>
   <Pressable
     style={({ pressed }) => [
@@ -196,7 +199,7 @@ const filteredCourses = useMemo(() => {
   </Pressable>
 </View>
 
-{/* Mottos Slider */}
+// Mottos Slider 
 <View style={styles.sliderWrapper}>
   <Animated.View
     style={[
@@ -230,9 +233,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
 
-  // =======================
 // TAKE QUIZ BUTTON
-// =======================
 
 quizButtonContainer: {
   paddingHorizontal: SIDE_MARGIN,
@@ -253,9 +254,8 @@ quizButtonText: {
   fontSize: 15,
   fontWeight: "700",
 },
- // =========================
+
 // HERO BANNER WITH OVERLAY
-// =========================
 
 bannerWrapper: {
   height: CONTENT_WIDTH * 0.55,
@@ -386,7 +386,7 @@ sliderWrapper: {
 
 sliderContainer: {
   flexDirection: "row",
-  width: CONTENT_WIDTH * 4, // number of mottos
+  width: CONTENT_WIDTH * 4, 
 },
 
 mottoSlide: {
@@ -469,10 +469,8 @@ searchFaculty: {
   color: "#64748b",
 },
 
-
-// =======================
 // HERO BUTTON ROW
-// =======================
+
 
 heroButtonRow: {
   flexDirection: "row",
@@ -511,10 +509,8 @@ heroSecondaryText: {
   fontWeight: "700",
   fontSize: 14,
 },
-
-// =======================
+  
 // FACULTY GRID
-// =======================
 
 facultyGridContainer: {
   paddingHorizontal: SIDE_MARGIN,
