@@ -29,7 +29,7 @@ export default function CourseDetailsScreen({ route }) {
     course.image2,
   ].filter(Boolean);
 
-  // 🔥 AUTO SLIDE
+  // AUTO SLIDE
   useEffect(() => {
     if (images.length <= 1) return;
 
@@ -43,7 +43,7 @@ export default function CourseDetailsScreen({ route }) {
       });
 
       setCurrentIndex(nextIndex);
-    }, 3000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [currentIndex, images.length]);
@@ -59,11 +59,10 @@ export default function CourseDetailsScreen({ route }) {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       
-      {/* TITLE */}
       <Text style={styles.title}>{course.name}</Text>
       <Text style={styles.level}>{course.level}</Text>
 
-      {/* DESCRIPTION */}
+     
       {course.description && (
         <View style={styles.card}>
           <Text style={styles.sectionHeader}>Course Description</Text>
@@ -71,7 +70,7 @@ export default function CourseDetailsScreen({ route }) {
         </View>
       )}
 
-      {/* IMAGE SLIDER */}
+    
       {images.length > 0 && (
         <View style={styles.sliderContainer}>
           <ScrollView
@@ -114,13 +113,13 @@ export default function CourseDetailsScreen({ route }) {
         </View>
       )}
 
-      {/* ENTRY REQUIREMENTS */}
+    //ENTRY REQUIREMENTS 
       <View style={styles.card}>
         <Text style={styles.sectionHeader}>Entry Requirements</Text>
         <Text style={styles.entry}>{course.entryRequirements}</Text>
       </View>
 
-      {/* ⭐ RATING */}
+     //rating
       <View style={styles.card}>
         <Text style={styles.sectionHeader}>Rate this course</Text>
 
@@ -139,7 +138,7 @@ export default function CourseDetailsScreen({ route }) {
         </Text>
       </View>
 
-      {/* VIDEO */}
+      
       {course.video && (
   <View style={styles.card}>
     <Text style={styles.sectionHeader}>Course Video</Text>
