@@ -16,11 +16,11 @@ const SIDE_MARGIN = width > 900 ? (width - 900) / 2 : 24;
 
 export default function CareerGuideScreen({ navigation }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [step, setStep] = useState("quiz"); // quiz → results
+  const [step, setStep] = useState("quiz");
   const [scores, setScores] = useState({ Science: 0, Business: 0, Design: 0 });
   const [results, setResults] = useState([]);
 
-  // ================= QUIZ QUESTIONS =================
+  //QUIZ QUESTIONS
   const questions = [
     { question: "1. Which subject do you enjoy most?", options: [
       { text: "Mathematics & Physics", category: "Science" },
@@ -49,7 +49,7 @@ export default function CareerGuideScreen({ navigation }) {
     ]},
   ];
 
-  // ================= QUIZ LOGIC =================
+  // QUIZ LOGIC
   const handleAnswer = (option) => {
     const updatedScores = { ...scores, [option.category]: scores[option.category] + 1 };
     setScores(updatedScores);
@@ -58,7 +58,7 @@ export default function CareerGuideScreen({ navigation }) {
     else calculateResult(updatedScores);
   };
 
-  // ================= CALCULATE RESULT =================
+  //CALCULATE RESULT
   const calculateResult = (finalScores) => {
     const highestCategory = Object.keys(finalScores).reduce((a, b) =>
       finalScores[a] > finalScores[b] ? a : b
@@ -92,12 +92,12 @@ export default function CareerGuideScreen({ navigation }) {
     setStep("quiz");
   };
 
-  // ================= UI =================
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={[styles.cardContainer, { width: CONTENT_WIDTH, marginHorizontal: SIDE_MARGIN }]}>
 
-        {/* QUIZ */}
+        
         {step === "quiz" && (
           <>
             <Text style={styles.progress}>Question {currentQuestion + 1} of {questions.length}</Text>
@@ -110,7 +110,7 @@ export default function CareerGuideScreen({ navigation }) {
           </>
         )}
 
-        {/* RESULTS */}
+        //results
         {step === "results" && (
           <>
             <Text style={styles.title}>Courses You Qualify For</Text>
